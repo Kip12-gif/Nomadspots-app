@@ -195,15 +195,15 @@ def ask_ai_advisor(prompt, spots_df):
     score = 0
     if (
         "quiet" in prompt_lower
-        and "quiet" in row["vibe"].lower()
-        or "quiet" in row["notes"].lower()
+        and "quiet" in str(row["vibe"]).lower()
+        or "quiet" in str(row["notes"]).lower()
     ):
       score += 3
     if "fast" in prompt_lower and row["wifi_rating"] == 5:
       score += 3
     if "coffee" in prompt_lower and row["coffee_rating"] == 5:
       score += 3
-    if "social" in prompt_lower and "social" in row["vibe"].lower():
+    if "social" in prompt_lower and "social" in str(row["vibe"]).lower():
       score += 2
     score += row["wifi_rating"] + row["coffee_rating"]
     matches.append((score, row))
@@ -336,6 +336,11 @@ with tab_directory:
     gmaps_url = (
         f"https://www.google.com/maps/search/?api=1&query={row['lat']},{row['lon']}"
     )
+    # Safely retrieve check_ins list using dict get to prevent KeyError
+    spot_checkins = row.get("check_ins", [])
+    if isinstance(spot_checkins, float):  # Handle NaN if dataframe parsed it weirdly
+      spot_checkins = []
+
     with st.container():
       col_a, col_b = st.columns([4, 1])
       with col_a:
@@ -347,13 +352,11 @@ with tab_directory:
         )
         st.info(row["notes"])
 
-        # Display Community Check-ins if any
-        if row["check_ins"]:
+        if spot_checkins:
           st.markdown("**💬 Community Check-ins:**")
-          for checkin in row["check_ins"]:
+          for checkin in spot_checkins:
             st.markdown(f"> *{checkin}*")
 
-        # Quick Check-in Input Form for this spot
         with st.expander(f"➕ Add Check-in for {row['name']}"):
           new_checkin = st.text_input(
               "Your tip or update",
@@ -365,6 +368,8 @@ with tab_directory:
               timestamp = datetime.now().strftime("%b %Y")
               for s in st.session_state.spots:
                 if s["id"] == row["id"]:
+                  if "check_ins" not in s:
+                    s["check_ins"] = []
                   s["check_ins"].append(
                       f"💬 Checked in {timestamp}: {new_checkin}"
                   )
@@ -473,7 +478,6 @@ with tab_guide:
       " to take with you."
   )
 
-  # Generate Markdown string
   guide_markdown = "# ☕ NomadSpots Travel & Workspace Guide\n\n"
   guide_markdown += (
       f"*Generated on {datetime.now().strftime('%B %d, %Y')}*\n\n---\n\n"
@@ -489,9 +493,10 @@ with tab_guide:
         f" {'⭐'*row['coffee_rating']} | **Vibe:** `{row['vibe']}`\n"
     )
     guide_markdown += f"- **Notes:** {row['notes']}\n"
-    if row["check_ins"]:
+    spot_checkins = row.get("check_ins", [])
+    if isinstance(spot_checkins, list) and spot_checkins:
       guide_markdown += "- **Check-ins:**\n"
-      for c in row["check_ins"]:
+      for c in spot_checkins:
         guide_markdown += f"  - {c}\n"
     guide_markdown += f"- [Open in Google Maps]({gmaps_url})\n\n---\n\n"
 
