@@ -1,4 +1,6 @@
-﻿import random
+import json
+import random
+from datetime import datetime
 import folium
 import pandas as pd
 import streamlit as st
@@ -11,19 +13,19 @@ st.set_page_config(
 )
 
 # ==============================================================================
-# 🎨 EYE-CATCHING COFFEE & DARK ROAST GLASSMORPHISM THEME (CSS)
+# 🎨 WARM COFFEEHOUSE DARK THEME (SOFTER & COZIER CSS)
 # ==============================================================================
 custom_css = """
 <style>
-/* Espresso Dark Background with Subtle Ambient Glow */
+/* Rich Warm Coffee Gradient Background (Softer on the eyes) */
 .stApp {
-    background: radial-gradient(circle at top right, #2E221B 0%, #17120F 60%, #0F0C0A 100%);
-    color: #F3EED9 !important;
+    background: linear-gradient(135deg, #231C17 0%, #382C24 100%);
+    color: #F7F3EE !important;
 }
 
 /* Typography - Cream & Golden Amber */
 html, body, [class*="css"], .stMarkdown, p, span, label, h1, h2, h3, h4, h5, h6 {
-    color: #F3EED9 !important;
+    color: #F7F3EE !important;
     font-family: 'Inter', -apple-system, sans-serif;
 }
 
@@ -31,10 +33,10 @@ html, body, [class*="css"], .stMarkdown, p, span, label, h1, h2, h3, h4, h5, h6 
 h1 {
     font-weight: 800;
     letter-spacing: -1px;
-    background: linear-gradient(90deg, #F59E0B, #FBBF24, #F3EED9);
+    background: linear-gradient(90deg, #F59E0B, #FBBF24, #F7F3EE);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    border-bottom: 2px solid rgba(245, 158, 11, 0.2);
+    border-bottom: 2px solid rgba(245, 158, 11, 0.25);
     padding-bottom: 10px;
 }
 h2, h3 {
@@ -42,30 +44,30 @@ h2, h3 {
     font-weight: 700;
 }
 
-/* Rich Dark Roasted Cards */
+/* Cozy Roasted Coffee Container Cards */
 div[data-testid="stBlock"] {
-    background: rgba(40, 32, 28, 0.75) !important;
+    background: rgba(52, 42, 35, 0.85) !important;
     backdrop-filter: blur(10px);
     border-radius: 12px;
-    border: 1px solid rgba(245, 158, 11, 0.25);
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    border: 1px solid rgba(245, 158, 11, 0.2);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
     padding: 1.4rem;
 }
 
 /* Golden Amber Glowing Buttons */
-div.stButton > button {
+div.stButton > button, div.stDownloadButton > button {
     background: linear-gradient(135deg, #D97706 0%, #F59E0B 100%) !important;
-    color: #0F0C0A !important;
+    color: #1C1510 !important;
     border-radius: 8px !important;
     border: none !important;
     font-weight: 700 !important;
-    box-shadow: 0 4px 14px rgba(245, 158, 11, 0.35);
+    box-shadow: 0 4px 14px rgba(245, 158, 11, 0.3);
     transition: all 0.3s ease;
 }
-div.stButton > button:hover {
+div.stButton > button:hover, div.stDownloadButton > button:hover {
     background: linear-gradient(135deg, #B45309 0%, #D97706 100%) !important;
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(245, 158, 11, 0.5);
+    box-shadow: 0 6px 18px rgba(245, 158, 11, 0.45);
 }
 
 /* Metric Cards */
@@ -75,33 +77,33 @@ div.stButton > button:hover {
     font-size: 2rem !important;
 }
 [data-testid="stMetricLabel"] {
-    color: #D1C7BD !important;
+    color: #D4C5B9 !important;
     font-weight: 600;
 }
 
 /* Custom Styled Tabs */
 .stTabs [data-baseweb="tab-list"] {
-    gap: 10px;
+    gap: 8px;
     background-color: transparent;
 }
 .stTabs [data-baseweb="tab"] {
-    background-color: rgba(40, 32, 28, 0.6) !important;
+    background-color: rgba(52, 42, 35, 0.7) !important;
     border-radius: 8px 8px 0px 0px;
     border: 1px solid rgba(245, 158, 11, 0.2);
-    color: #D1C7BD !important;
-    padding: 10px 20px;
+    color: #D4C5B9 !important;
+    padding: 10px 18px;
     font-weight: 600;
 }
 .stTabs [aria-selected="true"] {
     background-color: #F59E0B !important;
-    color: #0F0C0A !important;
+    color: #1C1510 !important;
     font-weight: 700 !important;
 }
 
-/* Input Fields styling for dark theme */
+/* Input Fields styling */
 input, select, textarea {
-    background-color: #17120F !important;
-    color: #F3EED9 !important;
+    background-color: #1C1510 !important;
+    color: #F7F3EE !important;
     border: 1px solid rgba(245, 158, 11, 0.3) !important;
     border-radius: 6px !important;
 }
@@ -127,6 +129,9 @@ if "spots" not in st.session_state:
               "Lightning fast Wi-Fi, excellent pour-overs, air-conditioned"
               " indoor booths."
           ),
+          "check_ins": [
+              "☕ Checked in Jan 2026: Amazing flat whites and steady AC!"
+          ],
       },
       {
           "id": 2,
@@ -141,6 +146,7 @@ if "spots" not in st.session_state:
               "Great sunlight, communal tables, fills up fast by 11 AM. Amazing"
               " flat whites."
           ),
+          "check_ins": ["🥐 Checked in Dec 2025: Perfect morning sunlight."],
       },
       {
           "id": 3,
@@ -155,6 +161,7 @@ if "spots" not in st.session_state:
               "Stunning minimalist wooden interior. Strict quiet zone on the"
               " second floor."
           ),
+          "check_ins": [],
       },
       {
           "id": 4,
@@ -169,6 +176,7 @@ if "spots" not in st.session_state:
               "Open-air garden workspace surrounded by tropical plants."
               " Reliable power outlets."
           ),
+          "check_ins": [],
       },
   ]
 
@@ -235,13 +243,14 @@ col3.metric(label="Global Avg Brew", value=f"{avg_coffee} / 5 ⭐")
 st.divider()
 
 # ==============================================================================
-# 📑 TABS: MAP vs DIRECTORY vs ADD SPOT vs AI ASSISTANT
+# 📑 TABS: MAP vs DIRECTORY vs ADD SPOT vs AI vs GUIDE
 # ==============================================================================
-tab_map, tab_directory, tab_add, tab_ai = st.tabs([
-    "🗺️ Global Map View",
-    "☕ Workspace Directory",
-    "✨ Submit New Haven",
-    "🤖 AI Nomad Advisor",
+tab_map, tab_directory, tab_add, tab_ai, tab_guide = st.tabs([
+    "🗺️ Global Map",
+    "☕ Directory & Check-ins",
+    "✨ Submit Haven",
+    "🤖 AI Advisor",
+    "🎒 Export Guide",
 ])
 
 with tab_map:
@@ -251,15 +260,12 @@ with tab_map:
       " using the map control on the top-right."
   )
 
-  # Initialize Dark CartoDB basemap to match UI perfectly
   m = folium.Map(
       location=[20.0, 0.0],
       zoom_start=2,
       tiles="CartoDB dark_matter",
       name="Dark Mode Map",
   )
-
-  # Add OpenStreetMap & Google Satellite
   folium.TileLayer("OpenStreetMap", name="OpenStreetMap").add_to(m)
   folium.TileLayer(
       tiles="https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}",
@@ -273,7 +279,7 @@ with tab_map:
         f"https://www.google.com/maps/search/?api=1&query={spot['lat']},{spot['lon']}"
     )
     popup_html = f"""
-        <div style="font-family: sans-serif; width: 220px; color: #17120F;">
+        <div style="font-family: sans-serif; width: 220px; color: #1C1510;">
             <h4 style="margin:0; color:#D97706;">{spot['name']}</h4>
             <p style="margin:4px 0; font-size:12px;">📍 <b>{spot['city']}</b></p>
             <p style="margin:4px 0; font-size:12px;">📶 Wi-Fi: {'⭐'*spot['wifi_rating']}</p>
@@ -297,20 +303,34 @@ with tab_map:
 with tab_directory:
   st.markdown("### Curated Cafe & Workspace Feed")
 
-  f1, f2 = st.columns(2)
-  with f1:
+  # Search and Filter Controls
+  s1, s2, s3 = st.columns([2, 1, 1])
+  with s1:
+    search_query = st.text_input(
+        "🔍 Instant Search", placeholder="Type a cafe name or city..."
+    )
+  with s2:
     vibe_filter = st.selectbox(
-        "Filter by Atmosphere", ["All"] + list(df["vibe"].unique())
+        "Atmosphere", ["All"] + list(df["vibe"].unique())
     )
-  with f2:
-    min_wifi = st.slider(
-        "Minimum Wi-Fi Rating ⭐", min_value=1, max_value=5, value=1
-    )
+  with s3:
+    min_wifi = st.slider("Min Wi-Fi ⭐", min_value=1, max_value=5, value=1)
 
+  # Apply Filters & Search
   filtered_df = df.copy()
+  if search_query:
+    filtered_df = filtered_df[
+        filtered_df["name"].str.contains(search_query, case=False, na=False)
+        | filtered_df["city"].str.contains(
+            search_query, case=False, na=False
+        )
+    ]
   if vibe_filter != "All":
     filtered_df = filtered_df[filtered_df["vibe"] == vibe_filter]
   filtered_df = filtered_df[filtered_df["wifi_rating"] >= min_wifi]
+
+  if filtered_df.empty:
+    st.info("No workspaces match your search criteria.")
 
   for _, row in filtered_df.iterrows():
     gmaps_url = (
@@ -326,7 +346,33 @@ with tab_directory:
             f" Atmosphere:** `{row['vibe']}`"
         )
         st.info(row["notes"])
+
+        # Display Community Check-ins if any
+        if row["check_ins"]:
+          st.markdown("**💬 Community Check-ins:**")
+          for checkin in row["check_ins"]:
+            st.markdown(f"> *{checkin}*")
+
+        # Quick Check-in Input Form for this spot
+        with st.expander(f"➕ Add Check-in for {row['name']}"):
+          new_checkin = st.text_input(
+              "Your tip or update",
+              placeholder="e.g., Great seating near the back window today",
+              key=f"checkin_input_{row['id']}",
+          )
+          if st.button("Post Check-in", key=f"post_{row['id']}"):
+            if new_checkin:
+              timestamp = datetime.now().strftime("%b %Y")
+              for s in st.session_state.spots:
+                if s["id"] == row["id"]:
+                  s["check_ins"].append(
+                      f"💬 Checked in {timestamp}: {new_checkin}"
+                  )
+              st.success("Check-in added successfully!")
+              st.rerun()
+
         st.markdown(f"[🗺️ Open Directions in Google Maps]({gmaps_url})")
+
       with col_b:
         if st.button("Delete Spot", key=f"del_{row['id']}"):
           st.session_state.spots = [
@@ -392,6 +438,7 @@ with tab_add:
             "coffee_rating": coffee_rate,
             "vibe": spot_vibe,
             "notes": spot_notes,
+            "check_ins": [],
         })
         st.success(f"Successfully published '{spot_name}'!")
         st.rerun()
@@ -418,3 +465,43 @@ with tab_ai:
       st.markdown(ai_response)
     else:
       st.warning("Please type a request for the AI advisor.")
+
+with tab_guide:
+  st.markdown("### 🎒 Export Travel & Workspace Guide")
+  st.markdown(
+      "Compile all current workspace havens into a clean Markdown travel guide"
+      " to take with you."
+  )
+
+  # Generate Markdown string
+  guide_markdown = "# ☕ NomadSpots Travel & Workspace Guide\n\n"
+  guide_markdown += (
+      f"*Generated on {datetime.now().strftime('%B %d, %Y')}*\n\n---\n\n"
+  )
+
+  for _, row in df.iterrows():
+    gmaps_url = (
+        f"https://www.google.com/maps/search/?api=1&query={row['lat']},{row['lon']}"
+    )
+    guide_markdown += f"### ☕ {row['name']} ({row['city']})\n"
+    guide_markdown += (
+        f"- **Wi-Fi:** {'⭐'*row['wifi_rating']} | **Coffee:**"
+        f" {'⭐'*row['coffee_rating']} | **Vibe:** `{row['vibe']}`\n"
+    )
+    guide_markdown += f"- **Notes:** {row['notes']}\n"
+    if row["check_ins"]:
+      guide_markdown += "- **Check-ins:**\n"
+      for c in row["check_ins"]:
+        guide_markdown += f"  - {c}\n"
+    guide_markdown += f"- [Open in Google Maps]({gmaps_url})\n\n---\n\n"
+
+  st.text_area(
+      "Markdown Guide Preview", value=guide_markdown, height=300
+  )
+
+  st.download_button(
+      label="📥 Download Travel Guide (.md)",
+      data=guide_markdown,
+      file_name="nomad_spots_guide.md",
+      mime="text/markdown",
+  )
