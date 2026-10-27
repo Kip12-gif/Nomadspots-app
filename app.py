@@ -7,105 +7,106 @@ import streamlit as st
 from streamlit_folium import st_folium
 
 st.set_page_config(
-    page_title="NomadSpots | Global Workspace & Coffee Scout",
+    page_title="NomadSpots | Vintage Workspace & Coffee Scout",
     page_icon="☕",
     layout="wide",
 )
 
 # ==============================================================================
-# 🎨 WARM COFFEEHOUSE DARK THEME (SOFTER & COZIER CSS)
+# 📜 VINTAGE LIGHT PARCHMENT & COFFEEHOUSE THEME (CSS)
 # ==============================================================================
 custom_css = """
 <style>
-/* Rich Warm Coffee Gradient Background (Softer on the eyes) */
+/* Authentic Aged Parchment Background with Subtle Grid */
 .stApp {
-    background: linear-gradient(135deg, #231C17 0%, #382C24 100%);
-    color: #F7F3EE !important;
+    background-color: #F5F1E8;
+    background-image: radial-gradient(#E3D6B8 0.75px, transparent 0.75px), 
+                      radial-gradient(#E3D6B8 0.75px, #F5F1E8 0.75px);
+    background-size: 30px 30px;
+    background-position: 0 0, 15px 15px;
 }
 
-/* Typography - Cream & Golden Amber */
+/* Antique Sepia & Espresso Typography */
 html, body, [class*="css"], .stMarkdown, p, span, label, h1, h2, h3, h4, h5, h6 {
-    color: #F7F3EE !important;
-    font-family: 'Inter', -apple-system, sans-serif;
+    color: #2D231B !important;
+    font-family: 'Georgia', serif;
 }
 
-/* Header Styling */
+/* Notebook Header styling with antique underline */
 h1 {
+    font-family: 'Georgia', serif;
     font-weight: 800;
-    letter-spacing: -1px;
-    background: linear-gradient(90deg, #F59E0B, #FBBF24, #F7F3EE);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    border-bottom: 2px solid rgba(245, 158, 11, 0.25);
+    color: #4A3525 !important;
+    border-bottom: 2px solid #C4B495;
     padding-bottom: 10px;
 }
 h2, h3 {
-    color: #FBBF24 !important;
+    font-family: 'Georgia', serif;
+    color: #5C3A21 !important;
     font-weight: 700;
 }
 
-/* Cozy Roasted Coffee Container Cards */
+/* Paper Journal Container Cards */
 div[data-testid="stBlock"] {
-    background: rgba(52, 42, 35, 0.85) !important;
-    backdrop-filter: blur(10px);
-    border-radius: 12px;
-    border: 1px solid rgba(245, 158, 11, 0.2);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+    background-color: #FCF9F2 !important;
+    border-radius: 6px;
+    border: 1px solid #C4B495;
+    box-shadow: 3px 5px 15px rgba(45, 35, 27, 0.08);
     padding: 1.4rem;
 }
 
-/* Golden Amber Glowing Buttons */
+/* Deep Leather Brown Accent Buttons */
 div.stButton > button, div.stDownloadButton > button {
-    background: linear-gradient(135deg, #D97706 0%, #F59E0B 100%) !important;
-    color: #1C1510 !important;
-    border-radius: 8px !important;
-    border: none !important;
-    font-weight: 700 !important;
-    box-shadow: 0 4px 14px rgba(245, 158, 11, 0.3);
-    transition: all 0.3s ease;
+    background-color: #5C3A21 !important;
+    color: #F5F1E8 !important;
+    border-radius: 4px !important;
+    border: 1px solid #3B2414 !important;
+    font-family: 'Georgia', serif;
+    font-weight: 600;
+    transition: all 0.2s ease;
 }
 div.stButton > button:hover, div.stDownloadButton > button:hover {
-    background: linear-gradient(135deg, #B45309 0%, #D97706 100%) !important;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 18px rgba(245, 158, 11, 0.45);
+    background-color: #432A17 !important;
 }
 
-/* Metric Cards */
+/* Custom Metrics */
 [data-testid="stMetricValue"] {
-    color: #FBBF24 !important;
-    font-weight: 800 !important;
+    color: #5C3A21 !important;
+    font-weight: 700 !important;
     font-size: 2rem !important;
 }
 [data-testid="stMetricLabel"] {
-    color: #D4C5B9 !important;
+    color: #554235 !important;
     font-weight: 600;
 }
 
 /* Custom Styled Tabs */
 .stTabs [data-baseweb="tab-list"] {
-    gap: 8px;
+    gap: 6px;
     background-color: transparent;
 }
 .stTabs [data-baseweb="tab"] {
-    background-color: rgba(52, 42, 35, 0.7) !important;
-    border-radius: 8px 8px 0px 0px;
-    border: 1px solid rgba(245, 158, 11, 0.2);
-    color: #D4C5B9 !important;
+    background-color: #E8DECA !important;
+    border-radius: 4px 4px 0px 0px;
+    border: 1px solid #C4B495;
+    color: #4A3525 !important;
     padding: 10px 18px;
     font-weight: 600;
+    font-family: 'Georgia', serif;
 }
 .stTabs [aria-selected="true"] {
-    background-color: #F59E0B !important;
-    color: #1C1510 !important;
+    background-color: #5C3A21 !important;
+    color: #F5F1E8 !important;
     font-weight: 700 !important;
 }
 
-/* Input Fields styling */
+/* Input Fields styling for vintage paper */
 input, select, textarea {
-    background-color: #1C1510 !important;
-    color: #F7F3EE !important;
-    border: 1px solid rgba(245, 158, 11, 0.3) !important;
-    border-radius: 6px !important;
+    background-color: #FCF9F2 !important;
+    color: #2D231B !important;
+    border: 1px solid #C4B495 !important;
+    border-radius: 4px !important;
+    font-family: 'Georgia', serif !important;
 }
 </style>
 """
@@ -226,8 +227,7 @@ def ask_ai_advisor(prompt, spots_df):
 # ==============================================================================
 st.title("☕ NomadSpots")
 st.markdown(
-    "##### *Discover, rate, and map the best remote work cafes and workspaces"
-    " worldwide.*"
+    "*A spatial field notebook and directory for remote workers worldwide.*"
 )
 
 df = pd.DataFrame(st.session_state.spots)
@@ -254,19 +254,18 @@ tab_map, tab_directory, tab_add, tab_ai, tab_guide = st.tabs([
 ])
 
 with tab_map:
-  st.markdown("### Interactive Workspace Atlas")
+  st.markdown("### Cartographic Field Atlas")
   st.caption(
-      "Switch between Dark CartoDB, OpenStreetMap, and Google Satellite layers"
-      " using the map control on the top-right."
+      "Switch between OpenStreetMap and Google Satellite layers using the map"
+      " control in the top-right corner."
   )
 
   m = folium.Map(
       location=[20.0, 0.0],
       zoom_start=2,
-      tiles="CartoDB dark_matter",
-      name="Dark Mode Map",
+      tiles="OpenStreetMap",
+      name="OpenStreetMap",
   )
-  folium.TileLayer("OpenStreetMap", name="OpenStreetMap").add_to(m)
   folium.TileLayer(
       tiles="https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}",
       attr="Google Satellite",
@@ -279,15 +278,15 @@ with tab_map:
         f"https://www.google.com/maps/search/?api=1&query={spot['lat']},{spot['lon']}"
     )
     popup_html = f"""
-        <div style="font-family: sans-serif; width: 220px; color: #1C1510;">
-            <h4 style="margin:0; color:#D97706;">{spot['name']}</h4>
+        <div style="font-family: Georgia, serif; width: 220px; color: #2D231B;">
+            <h4 style="margin:0; color:#5C3A21;">{spot['name']}</h4>
             <p style="margin:4px 0; font-size:12px;">📍 <b>{spot['city']}</b></p>
             <p style="margin:4px 0; font-size:12px;">📶 Wi-Fi: {'⭐'*spot['wifi_rating']}</p>
             <p style="margin:4px 0; font-size:12px;">☕ Coffee: {'⭐'*spot['coffee_rating']}</p>
             <p style="margin:4px 0; font-size:12px;">🏷️ {spot['vibe']}</p>
-            <hr style="margin:4px 0;">
-            <p style="font-size:11px; color:#444;">{spot['notes']}</p>
-            <a href="{gmaps_url}" target="_blank" style="display:block; margin-top:6px; font-size:12px; color:#D97706; font-weight:bold; text-decoration:none;">🗺️ Open in Google Maps</a>
+            <hr style="margin:4px 0; border-top: 1px solid #C4B495;">
+            <p style="font-size:11px; color:#555;">{spot['notes']}</p>
+            <a href="{gmaps_url}" target="_blank" style="display:block; margin-top:6px; font-size:12px; color:#5C3A21; font-weight:bold; text-decoration:none;">🗺️ Open in Google Maps</a>
         </div>
         """
     folium.Marker(
@@ -301,7 +300,7 @@ with tab_map:
   st_folium(m, width=1200, height=520)
 
 with tab_directory:
-  st.markdown("### Curated Cafe & Workspace Feed")
+  st.markdown("### Curated Cafe & Workspace Journal")
 
   # Search and Filter Controls
   s1, s2, s3 = st.columns([2, 1, 1])
@@ -336,9 +335,8 @@ with tab_directory:
     gmaps_url = (
         f"https://www.google.com/maps/search/?api=1&query={row['lat']},{row['lon']}"
     )
-    # Safely retrieve check_ins list using dict get to prevent KeyError
     spot_checkins = row.get("check_ins", [])
-    if isinstance(spot_checkins, float):  # Handle NaN if dataframe parsed it weirdly
+    if isinstance(spot_checkins, float):
       spot_checkins = []
 
     with st.container():
@@ -387,8 +385,11 @@ with tab_directory:
       st.divider()
 
 with tab_add:
-  st.markdown("### Submit a New Workspace Spot")
-  st.markdown("Help fellow digital nomads discover awesome work-friendly cafes.")
+  st.markdown("### Record a New Workspace Haven")
+  st.markdown(
+      "Pin a new work-friendly cafe or remote workspace to your field"
+      " notebook."
+  )
 
   with st.form("add_spot_form"):
     spot_name = st.text_input(
@@ -425,7 +426,7 @@ with tab_add:
         ),
     )
 
-    submitted = st.form_submit_button("Publish Spot to Atlas")
+    submitted = st.form_submit_button("Seal Entry in Atlas")
     if submitted:
       if spot_name and spot_city:
         new_id = (
@@ -445,7 +446,7 @@ with tab_add:
             "notes": spot_notes,
             "check_ins": [],
         })
-        st.success(f"Successfully published '{spot_name}'!")
+        st.success(f"Successfully recorded '{spot_name}' in your atlas!")
         st.rerun()
       else:
         st.error("Please provide a spot name and city.")
