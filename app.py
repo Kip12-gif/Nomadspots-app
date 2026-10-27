@@ -254,7 +254,7 @@ tab_map, tab_directory, tab_add, tab_ai, tab_guide = st.tabs([
 ])
 
 with tab_map:
-  st.markdown("### Cartographic Field Atlas")
+  st.markdown("### Mapped workspaces")
   st.caption(
       "Switch between OpenStreetMap and Google Satellite layers using the map"
       " control in the top-right corner."
